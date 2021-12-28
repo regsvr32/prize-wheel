@@ -28,6 +28,11 @@
         <button @click="loadDeposit" :disabled="rolling">重置为预设</button>
       </div>
       <textarea :readonly="rolling" v-model="rawPrizes" ref="prizeInput" />
+      <div class="github-link">
+        <a target="_blank" href="https://github.com/regsvr32/prize-wheel">
+          <img :src="gitHubIcon" /> GitHub
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -117,16 +122,26 @@ body
       width: 100%
       resize: none
       font-size: 14px
-      height: calc(100% - 36px)
+      height: calc(100% - 60px)
       border: none
       &:focus
         outline-color: #719ece
+    .github-link
+      margin-top: 8px 
+      text-align: end
+      a
+        text-decoration: none
+        color: #0969da
+        img
+          vertical-align: text-top
+          height: 1.2em
 </style>
 
 <script setup>
 import { ref, computed, watch, watchEffect, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { debounce } from 'lodash'
+import gitHubIcon from '../assets/GitHub-Mark-32px.png'
 
 const wheelCanvas = ref(null)
 const rawPrizes = ref('')
