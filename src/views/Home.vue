@@ -1,5 +1,5 @@
 <template>
-  <div class="main-container">
+  <div class="main-container" :class="{ portrait }" :style="{ height: windowHeight }">
     <div class="container-left">
       <h1 class="pointing-prize">{{pointingPrize}}</h1>
       <div class="wheel-area">
@@ -14,7 +14,7 @@
         <button class="start-roll" @click="startRoll" :disabled="rolling">&nbsp;转起！</button>
       </div>
     </div>
-    <div class="container-right">
+    <div class="container-right" :class="{ opened: drawerOpened }">
       <div class="prize-list">
         <h4>转盘设置：</h4>
         <textarea :readonly="rolling" v-model="rawPrizes" ref="prizeInput" />
@@ -31,6 +31,7 @@
         </a>
       </div>
     </div>
+    <div v-if="portrait" class="switch-drawer" @click="drawerOpened = !drawerOpened">{{drawerOpened ? '❌' : '🔧'}}</div>
   </div>
 </template>
 
@@ -39,16 +40,15 @@
   box-sizing: border-box
 body
   margin: 0px
+  overflow: hidden
 .main-container
   width: 100vw
-  height: 100vh
   display: flex
   overflow: hidden
   .container-left
     display: flex
     flex-direction: column
     flex-grow: 1
-    border-right: 1px solid #cccccc
     .pointing-prize
       text-align: center
       color: #2acb2a
@@ -97,6 +97,8 @@ body
     flex-direction: column
     width: 25%
     min-width: 360px
+    border-left: 1px solid #cccccc
+    background-color: #ffffff
     .prize-list
       display: flex
       flex-direction: column
@@ -130,14 +132,59 @@ body
         img
           vertical-align: text-top
           height: 1.2em
-
+  .switch-drawer
+    position: absolute
+    top: 12px
+    right: 12px
+    user-select: none
+    filter: grayscale(100%)
+    opacity: 50%
+  &.portrait
+    display: block
+    .container-left
+      width: 100%
+      height: 100%
+      .wheel-area
+        padding: 32px 16px
+        height: calc(100% - 210px)
+      .button-container
+        padding-top: 24px
+    .container-right
+      position: absolute
+      width: 96%
+      min-width: unset
+      height: 100%
+      top: 0%
+      left: 100%
+      transition: left 0.2s ease
+      &.opened
+        left: 4%
+    .prize-list, .roll-log
+      padding: 12px
 </style>
 
 <script setup>
-import { ref, computed, watch, watchEffect, nextTick } from 'vue'
+import { ref, computed, watch, watchEffect, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { debounce } from 'lodash'
 import gitHubIcon from '../assets/GitHub-Mark-32px.png'
+
+const portrait = ref(undefined)
+const drawerOpened = ref(false)
+const windowHeight = ref('100vh')
+
+function fitOrientation() {
+  portrait.value = window.matchMedia("(orientation: portrait)").matches
+  windowHeight.value = `${window.innerHeight}px`
+}
+
+onMounted(() => {
+  window.addEventListener("resize", fitOrientation)
+  fitOrientation()
+})
+onUnmounted(() => {
+  window.removeEventListener("resize", fitOrientation)
+})
 
 const wheelCanvas = ref(null)
 const rawPrizes = ref('')
@@ -165,7 +212,10 @@ if (!rawPrizes.value) {
   loadDeposit().then(() => {
     if (!prizeList.value.length) {
       const stopHandle = watchEffect(() => {
-        if (!prizeInput.value) { return }
+        if (!prizeInput.value || portrait.value === undefined) { return }
+        if (portrait.value) {
+          drawerOpened.value = true
+        }
         prizeInput.value.focus()
         nextTick(stopHandle)
       })
@@ -197,9 +247,9 @@ watchEffect(() => {
     ctx.rotate((angleFrom + angleTo) / 2)
     ctx.fillStyle = '#ffffff'
     ctx.strokeStyle = '#000000'
-    ctx.font = '40px sans'
+    ctx.font = `${portrait.value ? 72 : 48}px sans`
     const measure = ctx.measureText(prize)
-    const x = 270 - measure.width / 2
+    const x = 280 - measure.width / 2
     const y = measure.actualBoundingBoxAscent / 2
     ctx.fillText(prize, x, y)
     ctx.strokeText(prize, x, y)
