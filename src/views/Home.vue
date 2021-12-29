@@ -62,6 +62,7 @@ body
         max-height: 100%
         margin: auto
         aspect-ratio: 1 / 1
+        pointer-events: none
         canvas
           width: 100%
           height: 100%
@@ -290,7 +291,9 @@ function rollTick(time) {
 function startRoll() {
   rolling.value = true
   rotateFrom = wheelRotate.value % 1
-  rotateTurn = 9 + Math.random() * 3 - rotateFrom
+  const arr = new Uint16Array(1)
+  window.crypto.getRandomValues(arr)
+  rotateTurn = 9 + arr[0] / 0x10000 * 3 - rotateFrom
   startTime = 0
   rollTick(0)
 }
