@@ -138,7 +138,7 @@ body
     right: 12px
     user-select: none
     filter: grayscale(100%)
-    opacity: 50%
+    opacity: 0.5
   &.portrait
     display: block
     .container-left
