@@ -248,7 +248,7 @@ watchEffect(() => {
     ctx.rotate((angleFrom + angleTo) / 2)
     ctx.fillStyle = '#ffffff'
     ctx.strokeStyle = '#000000'
-    ctx.font = `${portrait.value ? 72 : 48}px sans`
+    ctx.font = `${portrait.value ? 72 : 48}px sans-serif`
     const measure = ctx.measureText(prize)
     const x = 280 - measure.width / 2
     const y = measure.actualBoundingBoxAscent / 2
